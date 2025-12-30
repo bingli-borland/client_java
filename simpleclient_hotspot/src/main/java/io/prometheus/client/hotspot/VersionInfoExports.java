@@ -34,9 +34,4 @@ public class VersionInfoExports extends Collector {
         );
         return i.collect();
     }
-
-    @Override
-    public String getText() {
-        return "";
-    }
 }

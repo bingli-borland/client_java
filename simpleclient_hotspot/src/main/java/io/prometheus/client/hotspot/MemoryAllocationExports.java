@@ -103,9 +103,4 @@ public class MemoryAllocationExports extends Collector {
   protected List<GarbageCollectorMXBean> getGarbageCollectorMXBeans() {
     return ManagementFactory.getGarbageCollectorMXBeans();
   }
-
-  @Override
-  public String getText() {
-    return "";
-  }
 }

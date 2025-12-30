@@ -237,9 +237,4 @@ public class MemoryPoolsExports extends Collector {
     addMemoryPoolMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
     return mfs;
   }
-
-  public String getText() {
-    return "";
-  }
-
 }

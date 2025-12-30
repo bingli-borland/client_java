@@ -178,9 +178,4 @@ public class StandardExports extends Collector {
       return new BufferedReader(new FileReader("/proc/self/status"));
     }
   }
-
-  @Override
-  public String getText() {
-    return "";
-  }
 }

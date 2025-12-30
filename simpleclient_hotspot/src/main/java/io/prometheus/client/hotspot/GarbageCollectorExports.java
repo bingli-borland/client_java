@@ -62,9 +62,4 @@ public class GarbageCollectorExports extends Collector {
     }
     return mfs;
   }
-
-  @Override
-  public String getText() {
-    return "";
-  }
 }

@@ -55,11 +55,6 @@ public abstract class SimpleCollector<Child> extends Collector {
   protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
   protected Child noLabelsChild;
 
-  @Override
-  public String getText() {
-    return "";
-  }
-
   /**
    * Return the Child with the given labels, creating it if needed.
    * <p>

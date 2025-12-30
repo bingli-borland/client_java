@@ -177,9 +177,4 @@ public class ThreadExports extends Collector {
     addThreadMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
     return mfs;
   }
-
-  @Override
-  public String getText() {
-    return "";
-  }
 }

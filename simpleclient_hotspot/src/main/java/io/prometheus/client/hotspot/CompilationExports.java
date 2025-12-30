@@ -63,9 +63,4 @@ public class CompilationExports extends Collector {
         addCompilationMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
         return mfs;
     }
-
-    @Override
-    public String getText() {
-        return "";
-    }
 }

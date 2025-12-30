@@ -146,9 +146,4 @@ public class BufferPoolsExports extends Collector {
         }
         return "<unknown>";
     }
-
-    @Override
-    public String getText() {
-        return "";
-    }
 }
