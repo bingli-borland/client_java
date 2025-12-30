@@ -62,7 +62,7 @@ public class ThreadExports extends Collector {
       sampleFamilies.add(
               new GaugeMetricFamily(
                       JVM_THREADS_CURRENT,
-                      "Current thread count of a JVM",
+                      "Current thread count of a JVM. JVM的当前线程计数。",
                       threadBean.getThreadCount()));
     }
 
@@ -70,7 +70,7 @@ public class ThreadExports extends Collector {
       sampleFamilies.add(
               new GaugeMetricFamily(
                       JVM_THREADS_DAEMON,
-                      "Daemon thread count of a JVM",
+                      "Daemon thread count of a JVM. JVM的守护进程线程计数。",
                       threadBean.getDaemonThreadCount()));
     }
 
@@ -78,7 +78,7 @@ public class ThreadExports extends Collector {
       sampleFamilies.add(
               new GaugeMetricFamily(
                       JVM_THREADS_PEAK,
-                      "Peak thread count of a JVM",
+                      "Peak thread count of a JVM. JVM的峰值线程数。",
                       threadBean.getPeakThreadCount()));
     }
 
@@ -86,7 +86,7 @@ public class ThreadExports extends Collector {
       sampleFamilies.add(
               new CounterMetricFamily(
                       JVM_THREADS_STARTED_TOTAL,
-                      "Started thread count of a JVM",
+                      "Started thread count of a JVM. JVM的启动线程计数。",
                       threadBean.getTotalStartedThreadCount()));
     }
 
@@ -95,7 +95,7 @@ public class ThreadExports extends Collector {
         sampleFamilies.add(
                 new GaugeMetricFamily(
                         JVM_THREADS_DEADLOCKED,
-                        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers",
+                        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers. 处于死锁状态的JVM线程的周期等待获取对象监视器或可拥有的同步器。",
                         nullSafeArrayLength(threadBean.findDeadlockedThreads())));
       }
 
@@ -103,14 +103,14 @@ public class ThreadExports extends Collector {
         sampleFamilies.add(
                 new GaugeMetricFamily(
                         JVM_THREADS_DEADLOCKED_MONITOR,
-                        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors",
+                        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors. 处于死锁状态等待获取对象监视器的JVM线程的周期。",
                         nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())));
       }
 
       if (nameFilter.test(JVM_THREADS_STATE)) {
         GaugeMetricFamily threadStateFamily = new GaugeMetricFamily(
                 JVM_THREADS_STATE,
-                "Current count of threads by state",
+                "Current count of threads by state. 按状态显示的当前线程数。",
                 Collections.singletonList("state"));
 
         Map<String, Integer> threadStateCounts = getThreadStateCountMap();
@@ -176,5 +176,10 @@ public class ThreadExports extends Collector {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
     addThreadMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
     return mfs;
+  }
+
+  @Override
+  public String getText() {
+    return "";
   }
 }

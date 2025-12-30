@@ -74,7 +74,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_OBJECTS_PENDING_FINALIZATION)) {
       GaugeMetricFamily finalizer = new GaugeMetricFamily(
               JVM_MEMORY_OBJECTS_PENDING_FINALIZATION,
-              "The number of objects waiting in the finalizer queue.",
+              "The number of objects waiting in the finalizer queue. finalizer队列中等待的对象数。",
               memoryBean.getObjectPendingFinalizationCount());
       sampleFamilies.add(finalizer);
     }
@@ -82,7 +82,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_BYTES_USED)) {
       GaugeMetricFamily used = new GaugeMetricFamily(
               JVM_MEMORY_BYTES_USED,
-              "Used bytes of a given JVM memory area.",
+              "Used bytes of a given JVM memory area. 给定JVM内存区域的已使用字节.",
               Collections.singletonList("area"));
       used.addMetric(Collections.singletonList("heap"), heapUsage.getUsed());
       used.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getUsed());
@@ -92,7 +92,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_BYTES_COMMITTED)) {
       GaugeMetricFamily committed = new GaugeMetricFamily(
               JVM_MEMORY_BYTES_COMMITTED,
-              "Committed (bytes) of a given JVM memory area.",
+              "Committed (bytes) of a given JVM memory area. 给定JVM内存区域的已提交字节。",
               Collections.singletonList("area"));
       committed.addMetric(Collections.singletonList("heap"), heapUsage.getCommitted());
       committed.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getCommitted());
@@ -102,7 +102,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_BYTES_MAX)) {
       GaugeMetricFamily max = new GaugeMetricFamily(
               JVM_MEMORY_BYTES_MAX,
-              "Max (bytes) of a given JVM memory area.",
+              "Max (bytes) of a given JVM memory area. 给定JVM内存区域的最大字节。",
               Collections.singletonList("area"));
       max.addMetric(Collections.singletonList("heap"), heapUsage.getMax());
       max.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getMax());
@@ -112,7 +112,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_BYTES_INIT)) {
       GaugeMetricFamily init = new GaugeMetricFamily(
               JVM_MEMORY_BYTES_INIT,
-              "Initial bytes of a given JVM memory area.",
+              "Initial bytes of a given JVM memory area. 给定JVM内存区域的初始字节。",
               Collections.singletonList("area"));
       init.addMetric(Collections.singletonList("heap"), heapUsage.getInit());
       init.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getInit());
@@ -128,7 +128,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_POOL_BYTES_USED)) {
       used = new GaugeMetricFamily(
               JVM_MEMORY_POOL_BYTES_USED,
-              "Used bytes of a given JVM memory pool.",
+              "Used bytes of a given JVM memory pool. 给定JVM内存池的使用字节。",
               Collections.singletonList("pool"));
       sampleFamilies.add(used);
       anyPoolMetricPassesFilter = true;
@@ -137,7 +137,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_POOL_BYTES_COMMITTED)) {
       committed = new GaugeMetricFamily(
               JVM_MEMORY_POOL_BYTES_COMMITTED,
-              "Committed bytes of a given JVM memory pool.",
+              "Committed bytes of a given JVM memory pool. 给定JVM内存池的提交字节。",
               Collections.singletonList("pool"));
       sampleFamilies.add(committed);
       anyPoolMetricPassesFilter = true;
@@ -146,7 +146,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_POOL_BYTES_MAX)) {
       max = new GaugeMetricFamily(
               JVM_MEMORY_POOL_BYTES_MAX,
-              "Max bytes of a given JVM memory pool.",
+              "Max bytes of a given JVM memory pool. 给定JVM内存池的最大字节。",
               Collections.singletonList("pool"));
       sampleFamilies.add(max);
       anyPoolMetricPassesFilter = true;
@@ -155,7 +155,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_POOL_BYTES_INIT)) {
       init = new GaugeMetricFamily(
               JVM_MEMORY_POOL_BYTES_INIT,
-              "Initial bytes of a given JVM memory pool.",
+              "Initial bytes of a given JVM memory pool. 给定JVM内存池的初始字节。",
               Collections.singletonList("pool"));
       sampleFamilies.add(init);
       anyPoolMetricPassesFilter = true;
@@ -164,7 +164,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_POOL_COLLECTION_USED_BYTES)) {
       collectionUsed = new GaugeMetricFamily(
               JVM_MEMORY_POOL_COLLECTION_USED_BYTES,
-              "Used bytes after last collection of a given JVM memory pool.",
+              "Used bytes after last collection of a given JVM memory pool. 给定JVM内存池的最后一次收集后使用的字节。",
               Collections.singletonList("pool"));
       sampleFamilies.add(collectionUsed);
       anyPoolMetricPassesFilter = true;
@@ -173,7 +173,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES)) {
       collectionCommitted = new GaugeMetricFamily(
               JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES,
-              "Committed after last collection bytes of a given JVM memory pool.",
+              "Committed after last collection bytes of a given JVM memory pool. 在给定JVM内存池的最后一个收集字节之后提交。",
               Collections.singletonList("pool"));
       sampleFamilies.add(collectionCommitted);
       anyPoolMetricPassesFilter = true;
@@ -182,7 +182,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_POOL_COLLECTION_MAX_BYTES)) {
       collectionMax = new GaugeMetricFamily(
               JVM_MEMORY_POOL_COLLECTION_MAX_BYTES,
-              "Max bytes after last collection of a given JVM memory pool.",
+              "Max bytes after last collection of a given JVM memory pool. 给定JVM内存池的最后一次收集后的最大字节。",
               Collections.singletonList("pool"));
       sampleFamilies.add(collectionMax);
       anyPoolMetricPassesFilter = true;
@@ -191,7 +191,7 @@ public class MemoryPoolsExports extends Collector {
     if (nameFilter.test(JVM_MEMORY_POOL_COLLECTION_INIT_BYTES)) {
       collectionInit = new GaugeMetricFamily(
               JVM_MEMORY_POOL_COLLECTION_INIT_BYTES,
-              "Initial after last collection bytes of a given JVM memory pool.",
+              "Initial after last collection bytes of a given JVM memory pool. 给定JVM内存池的最后一次收集字节后的初始值。",
               Collections.singletonList("pool"));
       sampleFamilies.add(collectionInit);
       anyPoolMetricPassesFilter = true;
@@ -237,4 +237,9 @@ public class MemoryPoolsExports extends Collector {
     addMemoryPoolMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
     return mfs;
   }
+
+  public String getText() {
+    return "";
+  }
+
 }

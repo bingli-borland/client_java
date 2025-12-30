@@ -85,7 +85,7 @@ public class BufferPoolsExports extends Collector {
         if (nameFilter.test(JVM_BUFFER_POOL_USED_BYTES)) {
             used = new GaugeMetricFamily(
                     JVM_BUFFER_POOL_USED_BYTES,
-                    "Used bytes of a given JVM buffer pool.",
+                    "Used bytes of a given JVM buffer pool. 给定JVM缓冲池的使用字节。",
                     Collections.singletonList("pool"));
             mfs.add(used);
         }
@@ -93,7 +93,7 @@ public class BufferPoolsExports extends Collector {
         if (nameFilter.test(JVM_BUFFER_POOL_CAPACITY_BYTES)) {
             capacity = new GaugeMetricFamily(
                     JVM_BUFFER_POOL_CAPACITY_BYTES,
-                    "Bytes capacity of a given JVM buffer pool.",
+                    "Bytes capacity of a given JVM buffer pool. 给定JVM缓冲池的字节容量。",
                     Collections.singletonList("pool"));
             mfs.add(capacity);
         }
@@ -101,7 +101,7 @@ public class BufferPoolsExports extends Collector {
         if (nameFilter.test(JVM_BUFFER_POOL_USED_BUFFERS)) {
             buffers = new GaugeMetricFamily(
                     JVM_BUFFER_POOL_USED_BUFFERS,
-                    "Used buffers of a given JVM buffer pool.",
+                    "Used buffers of a given JVM buffer pool. 给定JVM缓冲池的使用缓冲区",
                     Collections.singletonList("pool"));
             mfs.add(buffers);
         }
@@ -145,5 +145,10 @@ public class BufferPoolsExports extends Collector {
             LOGGER.fine("Couldn't call getName " + e.getMessage());
         }
         return "<unknown>";
+    }
+
+    @Override
+    public String getText() {
+        return "";
     }
 }

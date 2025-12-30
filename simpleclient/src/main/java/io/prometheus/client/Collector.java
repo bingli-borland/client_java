@@ -22,6 +22,10 @@ public abstract class Collector {
    */
   public abstract List<MetricFamilySamples> collect();
 
+  public String getText() {
+    return "";
+  }
+
   /**
    * Like {@link #collect()}, but the result should only contain {@code MetricFamilySamples} where
    * {@code sampleNameFilter.test(name)} is {@code true} for at least one Sample name.

@@ -50,7 +50,7 @@ public class GarbageCollectorExports extends Collector {
     if (nameFilter == null || nameFilter.test(JVM_GC_COLLECTION_SECONDS)) {
       SummaryMetricFamily gcCollection = new SummaryMetricFamily(
               JVM_GC_COLLECTION_SECONDS,
-              "Time spent in a given JVM garbage collector in seconds.",
+              "Time spent in a given JVM garbage collector in seconds. 在给定的JVM垃圾收集器中花费的时间（单位：秒）。",
               Collections.singletonList("gc"));
       for (final GarbageCollectorMXBean gc : garbageCollectors) {
         gcCollection.addMetric(
@@ -61,5 +61,10 @@ public class GarbageCollectorExports extends Collector {
       mfs.add(gcCollection);
     }
     return mfs;
+  }
+
+  @Override
+  public String getText() {
+    return "";
   }
 }

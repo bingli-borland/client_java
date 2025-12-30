@@ -19,7 +19,7 @@ import java.util.Map;
 public class MemoryAllocationExports extends Collector {
   private final Counter allocatedCounter = Counter.build()
           .name("jvm_memory_pool_allocated_bytes_total")
-          .help("Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.")
+          .help("Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously. 在给定的JVM内存池中分配的总字节数。仅在GC之后更新，不连续更新。")
           .labelNames("pool")
           .create();
 
@@ -102,5 +102,10 @@ public class MemoryAllocationExports extends Collector {
 
   protected List<GarbageCollectorMXBean> getGarbageCollectorMXBeans() {
     return ManagementFactory.getGarbageCollectorMXBeans();
+  }
+
+  @Override
+  public String getText() {
+    return "";
   }
 }

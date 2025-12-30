@@ -26,12 +26,17 @@ public class VersionInfoExports extends Collector {
 
 
     public List<MetricFamilySamples> collect() {
-        Info i = Info.build().name("jvm").help("VM version info").create();
+        Info i = Info.build().name("jvm").help("VM version info. 虚拟机版本信息。").create();
         i.info(
             "version", System.getProperty("java.runtime.version", "unknown"),
             "vendor", System.getProperty("java.vm.vendor", "unknown"),
             "runtime", System.getProperty("java.runtime.name", "unknown")
         );
         return i.collect();
+    }
+
+    @Override
+    public String getText() {
+        return "";
     }
 }

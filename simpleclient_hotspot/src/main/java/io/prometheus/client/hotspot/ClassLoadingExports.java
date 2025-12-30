@@ -48,19 +48,19 @@ public class ClassLoadingExports extends Collector {
     if (nameFilter.test(JVM_CLASSES_CURRENTLY_LOADED)) {
       sampleFamilies.add(new GaugeMetricFamily(
               JVM_CLASSES_CURRENTLY_LOADED,
-              "The number of classes that are currently loaded in the JVM",
+              "The number of classes that are currently loaded in the JVM. 当前在JVM中加载的类的数量。",
               clBean.getLoadedClassCount()));
     }
     if (nameFilter.test(JVM_CLASSES_LOADED_TOTAL)) {
       sampleFamilies.add(new CounterMetricFamily(
               JVM_CLASSES_LOADED_TOTAL,
-              "The total number of classes that have been loaded since the JVM has started execution",
+              "The total number of classes that have been loaded since the JVM has started execution. 自JVM开始执行以来已加载的类总数。",
               clBean.getTotalLoadedClassCount()));
     }
     if (nameFilter.test(JVM_CLASSES_UNLOADED_TOTAL)) {
       sampleFamilies.add(new CounterMetricFamily(
               JVM_CLASSES_UNLOADED_TOTAL,
-              "The total number of classes that have been unloaded since the JVM has started execution",
+              "The total number of classes that have been unloaded since the JVM has started execution. 自JVM开始执行以来已卸载的类总数。",
               clBean.getUnloadedClassCount()));
     }
   }
@@ -75,5 +75,10 @@ public class ClassLoadingExports extends Collector {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
     addClassLoadingMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
     return mfs;
+  }
+
+  @Override
+  public String getText() {
+    return "";
   }
 }

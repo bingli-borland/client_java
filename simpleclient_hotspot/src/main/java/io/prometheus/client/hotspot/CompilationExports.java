@@ -46,7 +46,7 @@ public class CompilationExports extends Collector {
             if (nameFilter.test(JVM_COMPILATION_TIME_SECONDS_TOTAL)) {
                 sampleFamilies.add(new CounterMetricFamily(
                         JVM_COMPILATION_TIME_SECONDS_TOTAL,
-                        "The total time in seconds taken for HotSpot class compilation",
+                        "The total time in seconds taken for HotSpot class compilation. 热点类编译所花费的总时间（单位：秒）。",
                         compilationMXBean.getTotalCompilationTime() / MILLISECONDS_PER_SECOND));
             }
         }
@@ -62,5 +62,10 @@ public class CompilationExports extends Collector {
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>(1);
         addCompilationMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
         return mfs;
+    }
+
+    @Override
+    public String getText() {
+        return "";
     }
 }

@@ -62,14 +62,14 @@ public class StandardExports extends Collector {
       // com.sun.management and com.ibm.lang.management. Hence use reflection and recursively go
       // through implemented interfaces until the method can be made accessible and invoked.
       Long processCpuTime = callLongGetter("getProcessCpuTime", osBean);
-      mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
+      mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds. 用户和系统CPU总时间（单位：秒）。",
           processCpuTime / NANOSECONDS_PER_SECOND));
     }
     catch (Exception e) {
       LOGGER.log(Level.FINE,"Could not access process cpu time", e);
     }
 
-    mfs.add(new GaugeMetricFamily("process_start_time_seconds", "Start time of the process since unix epoch in seconds.",
+    mfs.add(new GaugeMetricFamily("process_start_time_seconds", "Start time of the process since unix epoch in seconds. 自 unix epoch 开始的进程启动时间（单位：秒）。",
         runtimeBean.getStartTime() / MILLISECONDS_PER_SECOND));
 
     // There exist at least 2 similar but unrelated UnixOperatingSystemMXBean interfaces, in
@@ -177,5 +177,10 @@ public class StandardExports extends Collector {
     BufferedReader procSelfStatusReader() throws FileNotFoundException {
       return new BufferedReader(new FileReader("/proc/self/status"));
     }
+  }
+
+  @Override
+  public String getText() {
+    return "";
   }
 }
