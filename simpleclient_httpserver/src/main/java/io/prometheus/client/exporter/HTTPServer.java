@@ -22,6 +22,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -91,22 +92,28 @@ public class HTTPServer implements Closeable {
             String contextPath = t.getHttpContext().getPath();
             ByteArrayOutputStream response = this.response.get();
             response.reset();
-            OutputStreamWriter osw = new OutputStreamWriter(response, Charset.forName("UTF-8"));
-            if ("/-/healthy".equals(contextPath)) {
-                osw.write(HEALTHY_RESPONSE);
-            } else {
-                String contentType = TextFormat.chooseContentType(t.getRequestHeaders().getFirst("Accept"));
-                t.getResponseHeaders().set("Content-Type", contentType);
-                Predicate<String> filter = sampleNameFilterSupplier == null ? null : sampleNameFilterSupplier.get();
-                filter = SampleNameFilter.restrictToNamesEqualTo(filter, parseQuery(query));
-                if (filter == null) {
-                    TextFormat.writeFormat(contentType, osw, registry.metricFamilySamples());
+            try(OutputStreamWriter osw = new OutputStreamWriter(response, Charset.forName("UTF-8"));) {
+                if ("/-/healthy".equals(contextPath)) {
+                    osw.write(HEALTHY_RESPONSE);
+                } else if (HTTPServer.CONTEXTS.contains(contextPath)) {
+                    String contentType = TextFormat.chooseContentType(t.getRequestHeaders().getFirst("Accept"));
+                    t.getResponseHeaders().set("Content-Type", contentType);
+                    if (this.isTextMode()) {
+                        t.getResponseHeaders().set("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
+                        osw.write(this.registry.getText());
+                    } else {
+                        Predicate<String> filter = sampleNameFilterSupplier == null ? null : sampleNameFilterSupplier.get();
+                        filter = SampleNameFilter.restrictToNamesEqualTo(filter, parseQuery(query));
+                        if (filter == null) {
+                            TextFormat.writeFormat(contentType, osw, registry.metricFamilySamples());
+                        } else {
+                            TextFormat.writeFormat(contentType, osw, registry.filteredMetricFamilySamples(filter));
+                        }
+                    }
                 } else {
-                    TextFormat.writeFormat(contentType, osw, registry.filteredMetricFamilySamples(filter));
+                    osw.write("Context path not found.");
                 }
             }
-
-            osw.close();
 
             if (shouldUseCompression(t)) {
                 t.getResponseHeaders().set("Content-Encoding", "gzip");
@@ -196,6 +203,7 @@ public class HTTPServer implements Closeable {
         }
     }
 
+    private static final Set<String> CONTEXTS = new HashSet(Arrays.asList("/metrics"));
     protected final HttpServer server;
     protected final ExecutorService executorService;
 
@@ -354,7 +362,7 @@ public class HTTPServer implements Closeable {
                 assertNull(inetAddress, "cannot configure 'httpServer' and 'inetAddress' at the same time");
                 assertNull(inetSocketAddress, "cannot configure 'httpServer' and 'inetSocketAddress' at the same time");
                 assertNull(httpsConfigurator, "cannot configure 'httpServer' and 'httpsConfigurator' at the same time");
-                return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator, false);
+                return new HTTPServer(executorService, httpServer, new HashSet<String>(), registry, daemon, sampleNameFilterSupplier, authenticator, false);
             } else if (inetSocketAddress != null) {
                 assertZero(port, "cannot configure 'inetSocketAddress' and 'port' at the same time");
                 assertNull(hostname, "cannot configure 'inetSocketAddress' and 'hostname' at the same time");
@@ -376,7 +384,7 @@ public class HTTPServer implements Closeable {
                 httpServer = HttpServer.create(inetSocketAddress, 3);
             }
 
-            return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator, false);
+            return new HTTPServer(executorService, httpServer, new HashSet<String>(), registry, daemon, sampleNameFilterSupplier, authenticator, false);
         }
 
         private void assertNull(Object o, String msg) {
@@ -397,7 +405,7 @@ public class HTTPServer implements Closeable {
      * The {@code httpServer} is expected to already be bound to an address
      */
     public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
-        this(null, httpServer, registry, daemon, null, null, false);
+        this(null, httpServer, new HashSet<String>(), registry, daemon, null, null, false);
     }
 
     /**
@@ -427,7 +435,7 @@ public class HTTPServer implements Closeable {
      * The {@code httpServer} is expected to already be bound to an address
      */
     public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon, boolean textMode) throws IOException {
-        this(null, httpServer, registry, daemon, null, null, textMode);
+        this(null, httpServer, new HashSet<String>(), registry, daemon, null, null, textMode);
     }
 
     /**
@@ -472,11 +480,37 @@ public class HTTPServer implements Closeable {
         this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false, textMode);
     }
 
-    private HTTPServer(ExecutorService executorService, HttpServer httpServer, CollectorRegistry registry, boolean daemon, Supplier<Predicate<String>> sampleNameFilterSupplier, Authenticator authenticator, boolean textMode) {
+
+    public HTTPServer(InetSocketAddress addr, Set<String> ctxSet, CollectorRegistry registry, boolean daemon, Authenticator authenticator, boolean textMode) throws IOException {
+        this(HttpServer.create(addr, 3), ctxSet, registry, daemon, authenticator, textMode);
+    }
+
+    public HTTPServer(InetSocketAddress addr, Set<String> ctxSet, CollectorRegistry registry, boolean daemon, boolean textMode) throws IOException {
+        this(HttpServer.create(addr, 3), ctxSet, registry, daemon, textMode);
+    }
+
+    public HTTPServer(HttpServer httpServer, Set<String> ctxSet, CollectorRegistry registry, boolean daemon, Authenticator authenticator, boolean textMode) throws IOException {
+        this(null, httpServer, ctxSet, registry, daemon, null, authenticator, textMode);
+    }
+
+    public HTTPServer(HttpServer httpServer, Set<String> ctxSet, CollectorRegistry registry, boolean daemon, boolean textMode) throws IOException {
+        this((HttpServer)httpServer, ctxSet, registry, daemon, (Authenticator)null, textMode);
+    }
+
+    private HTTPServer(ExecutorService executorService, HttpServer httpServer, Set<String> ctxSet, CollectorRegistry registry, boolean daemon, Supplier<Predicate<String>> sampleNameFilterSupplier, Authenticator authenticator, boolean textMode) {
         if (httpServer.getAddress() == null)
             throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
 
         server = httpServer;
+        if (ctxSet == null) {
+            ctxSet = new HashSet();
+        }
+        if (ctxSet.isEmpty()) {
+            ctxSet.add("/metrics");
+        }
+        ctxSet.add("/-/healthy");
+        CONTEXTS.clear();
+        CONTEXTS.addAll(ctxSet);
         HttpHandler mHandler = new HTTPMetricHandler(registry, sampleNameFilterSupplier, textMode);
         HttpContext mContext = server.createContext("/", mHandler);
         if (authenticator != null) {
