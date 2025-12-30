@@ -112,13 +112,13 @@ public class TestHTTPServer {
   @Test(expected = IllegalArgumentException.class)
   public void testRefuseUsingUnbound() throws IOException {
     CollectorRegistry registry = new CollectorRegistry();
-    HTTPServer httpServer = new HTTPServer(HttpServer.create(), registry, true);
+    HTTPServer httpServer = new HTTPServer(HttpServer.create(), registry, true, false);
     httpServer.close();
   }
 
   @Test
   public void testSimpleRequest() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry, false);
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics").build().execute().getBody();
@@ -132,7 +132,7 @@ public class TestHTTPServer {
 
   @Test
   public void testBadParams() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry, false);
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics?x").build().execute().getBody();
@@ -146,7 +146,7 @@ public class TestHTTPServer {
 
   @Test
   public void testSingleName() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry, false);
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics?name[]=a").build().execute().getBody();
@@ -160,7 +160,7 @@ public class TestHTTPServer {
 
   @Test
   public void testMultiName() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry, false);
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics?name[]=a&name[]=b").build().execute().getBody();
@@ -211,7 +211,7 @@ public class TestHTTPServer {
 
   @Test
   public void testDecoding() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry, false);
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics?n%61me[]=%61").build().execute().getBody();
@@ -225,7 +225,7 @@ public class TestHTTPServer {
 
   @Test
   public void testGzipCompression() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry, false);
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics")
@@ -242,7 +242,7 @@ public class TestHTTPServer {
 
   @Test
   public void testOpenMetrics() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry, false);
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics")
@@ -256,7 +256,7 @@ public class TestHTTPServer {
 
   @Test
   public void testHealth() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry, false);
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/-/healthy").build().execute().getBody();
@@ -268,7 +268,7 @@ public class TestHTTPServer {
 
   @Test
   public void testHealthGzipCompression() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry, false);
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/-/healthy")
@@ -377,7 +377,7 @@ public class TestHTTPServer {
   public void testSimpleRequestHttpServerWithHTTPMetricHandler() throws IOException {
     InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", 0);
     HttpServer httpServer = HttpServer.create(inetSocketAddress, 0);
-    httpServer.createContext("/metrics", new HTTPServer.HTTPMetricHandler(registry));
+    httpServer.createContext("/metrics", new HTTPServer.HTTPMetricHandler(registry, false));
     httpServer.start();
 
     try {
@@ -479,7 +479,7 @@ public class TestHTTPServer {
     InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", 0);
 
     HttpServer externalHttpServer = HttpServer.create(inetSocketAddress, 0);
-    externalHttpServer.createContext("/metrics", new HTTPServer.HTTPMetricHandler(registry));
+    externalHttpServer.createContext("/metrics", new HTTPServer.HTTPMetricHandler(registry, false));
     externalHttpServer.start();
 
     ExecutorService executorService = Executors.newFixedThreadPool(20);

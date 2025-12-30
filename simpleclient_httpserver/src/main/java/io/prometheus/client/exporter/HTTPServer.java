@@ -73,14 +73,16 @@ public class HTTPServer implements Closeable {
         private final LocalByteArray response = new LocalByteArray();
         private final Supplier<Predicate<String>> sampleNameFilterSupplier;
         private final static String HEALTHY_RESPONSE = "Exporter is Healthy.";
+        private boolean textMode;
 
-        public HTTPMetricHandler(CollectorRegistry registry) {
-            this(registry, null);
+        public HTTPMetricHandler(CollectorRegistry registry, boolean textMode) {
+            this(registry, null, textMode);
         }
 
-        public HTTPMetricHandler(CollectorRegistry registry, Supplier<Predicate<String>> sampleNameFilterSupplier) {
+        public HTTPMetricHandler(CollectorRegistry registry, Supplier<Predicate<String>> sampleNameFilterSupplier, boolean textMode) {
             this.registry = registry;
             this.sampleNameFilterSupplier = sampleNameFilterSupplier;
+            this.textMode = textMode;
         }
 
         @Override
@@ -127,6 +129,14 @@ public class HTTPServer implements Closeable {
                 response.writeTo(t.getResponseBody());
             }
             t.close();
+        }
+
+        public boolean isTextMode() {
+            return this.textMode;
+        }
+
+        public void setTextMode(boolean textMode) {
+            this.textMode = textMode;
         }
     }
 
@@ -344,7 +354,7 @@ public class HTTPServer implements Closeable {
                 assertNull(inetAddress, "cannot configure 'httpServer' and 'inetAddress' at the same time");
                 assertNull(inetSocketAddress, "cannot configure 'httpServer' and 'inetSocketAddress' at the same time");
                 assertNull(httpsConfigurator, "cannot configure 'httpServer' and 'httpsConfigurator' at the same time");
-                return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
+                return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator, false);
             } else if (inetSocketAddress != null) {
                 assertZero(port, "cannot configure 'inetSocketAddress' and 'port' at the same time");
                 assertNull(hostname, "cannot configure 'inetSocketAddress' and 'hostname' at the same time");
@@ -366,7 +376,7 @@ public class HTTPServer implements Closeable {
                 httpServer = HttpServer.create(inetSocketAddress, 3);
             }
 
-            return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
+            return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator, false);
         }
 
         private void assertNull(Object o, String msg) {
@@ -387,57 +397,87 @@ public class HTTPServer implements Closeable {
      * The {@code httpServer} is expected to already be bound to an address
      */
     public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
-        this(null, httpServer, registry, daemon, null, null);
-    }
-
-    /**
-     * Start an HTTP server serving Prometheus metrics from the given registry.
-     */
-    public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean daemon) throws IOException {
-        this(HttpServer.create(addr, 3), registry, daemon);
+        this(null, httpServer, registry, daemon, null, null, false);
     }
 
     /**
      * Start an HTTP server serving Prometheus metrics from the given registry using non-daemon threads.
      */
     public HTTPServer(InetSocketAddress addr, CollectorRegistry registry) throws IOException {
-        this(addr, registry, false);
-    }
-
-    /**
-     * Start an HTTP server serving the default Prometheus registry.
-     */
-    public HTTPServer(int port, boolean daemon) throws IOException {
-        this(new InetSocketAddress(port), CollectorRegistry.defaultRegistry, daemon);
+        this(addr, registry, false, false);
     }
 
     /**
      * Start an HTTP server serving the default Prometheus registry using non-daemon threads.
      */
     public HTTPServer(int port) throws IOException {
-        this(port, false);
-    }
-
-    /**
-     * Start an HTTP server serving the default Prometheus registry.
-     */
-    public HTTPServer(String host, int port, boolean daemon) throws IOException {
-        this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, daemon);
+        this(port, false, false);
     }
 
     /**
      * Start an HTTP server serving the default Prometheus registry using non-daemon threads.
      */
     public HTTPServer(String host, int port) throws IOException {
-        this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false);
+        this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false, false);
     }
 
-    private HTTPServer(ExecutorService executorService, HttpServer httpServer, CollectorRegistry registry, boolean daemon, Supplier<Predicate<String>> sampleNameFilterSupplier, Authenticator authenticator) {
+
+    /**
+     * Start an HTTP server serving Prometheus metrics from the given registry using the given {@link HttpServer}.
+     * The {@code httpServer} is expected to already be bound to an address
+     */
+    public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon, boolean textMode) throws IOException {
+        this(null, httpServer, registry, daemon, null, null, textMode);
+    }
+
+    /**
+     * Start an HTTP server serving Prometheus metrics from the given registry.
+     */
+    public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean daemon, boolean textMode) throws IOException {
+        this(HttpServer.create(addr, 3), registry, daemon, textMode);
+    }
+
+    /**
+     * Start an HTTP server serving Prometheus metrics from the given registry using non-daemon threads.
+     */
+    public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean textMode) throws IOException {
+        this(addr, registry, false, textMode);
+    }
+
+    /**
+     * Start an HTTP server serving the default Prometheus registry.
+     */
+    public HTTPServer(int port, boolean daemon, boolean textMode) throws IOException {
+        this(new InetSocketAddress(port), CollectorRegistry.defaultRegistry, daemon, textMode);
+    }
+
+    /**
+     * Start an HTTP server serving the default Prometheus registry using non-daemon threads.
+     */
+    public HTTPServer(int port, boolean textMode) throws IOException {
+        this(port, false, textMode);
+    }
+
+    /**
+     * Start an HTTP server serving the default Prometheus registry.
+     */
+    public HTTPServer(String host, int port, boolean daemon, boolean textMode) throws IOException {
+        this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, daemon, textMode);
+    }
+
+    /**
+     * Start an HTTP server serving the default Prometheus registry using non-daemon threads.
+     */
+    public HTTPServer(String host, int port, boolean textMode) throws IOException {
+        this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false, textMode);
+    }
+
+    private HTTPServer(ExecutorService executorService, HttpServer httpServer, CollectorRegistry registry, boolean daemon, Supplier<Predicate<String>> sampleNameFilterSupplier, Authenticator authenticator, boolean textMode) {
         if (httpServer.getAddress() == null)
             throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
 
         server = httpServer;
-        HttpHandler mHandler = new HTTPMetricHandler(registry, sampleNameFilterSupplier);
+        HttpHandler mHandler = new HTTPMetricHandler(registry, sampleNameFilterSupplier, textMode);
         HttpContext mContext = server.createContext("/", mHandler);
         if (authenticator != null) {
             mContext.setAuthenticator(authenticator);

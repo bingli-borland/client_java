@@ -60,9 +60,11 @@ public class PushGateway {
   private static final int MILLISECONDS_PER_SECOND = 1000;
 
   // Visible for testing.
-  protected final String gatewayBaseURL;
+  public final String gatewayBaseURL;
 
   private HttpConnectionFactory connectionFactory = new DefaultHttpConnectionFactory();
+
+  private boolean textMode;
 
   /**
    * Construct a Pushgateway, with the given address.
@@ -70,7 +72,11 @@ public class PushGateway {
    * @param address  host:port or ip:port of the Pushgateway.
    */
   public PushGateway(String address) {
-    this(createURLSneakily("http://" + address));
+    this(address, false);
+  }
+
+  public PushGateway(String address, boolean textMode) {
+    this(createURLSneakily("http://" + address), textMode);
   }
 
   /**
@@ -78,10 +84,11 @@ public class PushGateway {
    * <p>
    * @param serverBaseURL the base URL and optional context path of the Pushgateway server.
    */
-  public PushGateway(URL serverBaseURL) {
+  public PushGateway(URL serverBaseURL, boolean textMode) {
     this.gatewayBaseURL = URI.create(serverBaseURL.toString() + "/metrics/")
       .normalize()
       .toString();
+    this.textMode = textMode;
   }
 
   public void setConnectionFactory(HttpConnectionFactory connectionFactory) {
@@ -244,10 +251,14 @@ public class PushGateway {
 
     try {
       if (!method.equals("DELETE")) {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
-        TextFormat.write004(writer, registry.metricFamilySamples());
-        writer.flush();
-        writer.close();
+        try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));) {
+          if (this.textMode) {
+            writer.write(registry.getText());
+          } else {
+            TextFormat.write004(writer, registry.metricFamilySamples());
+          }
+          writer.flush();
+        }
       }
 
       int response = connection.getResponseCode();

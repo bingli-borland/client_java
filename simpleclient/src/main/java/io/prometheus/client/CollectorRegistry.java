@@ -131,6 +131,12 @@ public class CollectorRegistry {
     return new MetricFamilySamplesEnumeration();
   }
 
+  public String getText() {
+    StringBuilder buffer = new StringBuilder();
+    this.collectors().forEach((collector) -> buffer.append(collector.getText()).append("\n"));
+    return buffer.toString();
+  }
+
   /**
    * Enumeration of metrics matching the specified names.
    * <p>
